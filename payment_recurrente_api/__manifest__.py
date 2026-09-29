@@ -1,5 +1,5 @@
 {
-    "name": "Recurrente Payments",
+    "name": "Recurrente Checkout",
     "version": "20.0.1.0.0",
     "category": "Accounting/Payment Providers",
     "summary": "Accept payments in Guatemala with Recurrente: checkout, saved cards and refunds.",
