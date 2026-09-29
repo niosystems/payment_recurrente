@@ -18,7 +18,7 @@ Leyenda: ✅ cumple · ⚠️ decisión o dato pendiente · ❌ incumple y hay q
 
 | Guía | Estado | Detalle |
 |---|---|---|
-| `name` de máximo 25 caracteres, explícito, sin adjetivos ni nombre de empresa | ✅ | `Recurrente Payments` (19 caracteres). |
+| `name` de máximo 25 caracteres, explícito, sin adjetivos ni nombre de empresa | ✅ | `Recurrente Checkout` (20 caracteres). Se cambió de `Recurrente Payments` porque ya existe una app de otro autor con ese nombre exacto en la tienda. |
 | Mismo nombre en todas las versiones de Odoo | ✅ | Aplicado en `19.0` y `20.0`. |
 | `version` con la versión de Odoo y formato mayor.menor.corrección | ✅ | `20.0.1.0.0`. |
 | Apps en beta con versión menor a 1.0 | ✅ | Se publica `1.0.0`: ya hubo cobros y reembolsos reales en modo *live*, con fondos propios. |
@@ -62,7 +62,7 @@ Leyenda: ✅ cumple · ⚠️ decisión o dato pendiente · ❌ incumple y hay q
 | Criterio | Estado |
 |---|---|
 | Tiene icono | ✅ (`icon.png`, 128×128, cuadrado) |
-| Tiene imagen de portada (thumbnail) | ⚠️ Falta `banner.png` y la clave `images` del manifest |
+| Tiene imagen de portada (thumbnail) | ✅ `banner.png` y clave `images` del manifest activos |
 | Licencia definida | ✅ |
 | Valoración mayor o igual a 3 | — (aún sin valoraciones) |
 | Descripción en HTML | ✅ |
@@ -73,14 +73,14 @@ Todos van en `payment_recurrente_api/static/description/`, en inglés, con el **
 
 | Archivo | Qué mostrar | Formato |
 |---|---|---|
-| `banner.png` | Portada: logo de Recurrente y el texto "Recurrente Payments". | PNG, proporción 2:1 (por ejemplo 1120×560) |
+| `banner.png` | Portada: logo de Recurrente y el nombre del módulo. | PNG, proporción 2:1 (por ejemplo 1120×560) |
 | `provider_form.png` | Ficha del proveedor con *Secret Key* y *Webhook Signing Secret* (difuminados), modo de prueba y pestaña *Payment Methods*. | PNG, ancho ≥ 1200 px |
 | `checkout_option.png` | El pago en la tienda web o en una factura, con **Recurrente** como opción. | PNG |
 | `saved_card.png` | Ficha de un contacto (o *Payment Tokens*) con una tarjeta guardada `•••• 4242`. | PNG |
 | `refund.png` | Transacción confirmada con el botón de reembolso, o la transacción hija `R-...` confirmada. | PNG |
 | `demo.gif` | Flujo completo de 15 a 25 segundos: elegir Recurrente, pagar en el Sandbox con `4242 4242 4242 4242`, volver a Odoo y ver la transacción confirmada. | GIF, menos de 5 MB |
 
-Cuando existan: quita los marcadores `<!--` y `-->` alrededor de los `<img>` en `index.html` (solo los de archivos que existan) y descomenta la línea `"images"` en `__manifest__.py`.
+Todas listas y conectadas en `index.html`.
 
 ## Antes de subir cada rama
 
@@ -89,6 +89,7 @@ Cuando existan: quita los marcadores `<!--` y `-->` alrededor de los `<img>` en 
 - [ ] El nombre del módulo es el mismo en las dos ramas.
 - [ ] No hay llaves, contraseñas ni datos reales en el código, en `static/` ni en las capturas.
 - [ ] El ZIP contiene la carpeta `payment_recurrente_api/` en su raíz, sin `__pycache__` ni `.git`.
+- [ ] `payment_recurrente_api/LICENSE` existe (copia del `LICENSE` de la raíz). El de la raíz no viaja en el ZIP ni lo ve el escáner de la tienda: sin esta copia dentro del módulo, la ficha no muestra la pestaña de licencia.
 
 ## Subida
 
