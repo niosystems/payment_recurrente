@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+
+    <!-- The payment method the customer actually uses (card, bank transfer, ...) is chosen on
+         Recurrente's hosted checkout, so a single generic method is registered. -->
+    <record id="payment_method_recurrente" model="payment.method">
+        <field name="name">Recurrente</field>
+        <field name="code">recurrente</field>
+        <field name="sequence">10</field>
+        <field name="provider_id" ref="payment_recurrente_api.payment_provider_recurrente_api"/>
+        <field name="image" type="bytes" file="payment_recurrente_api/static/img/recurrente.png"/>
+        <field name="support_tokenization">True</field>
+        <field name="support_refund">partial</field>
+        <field name="supported_currency_ids"
+               eval="[Command.set([ref('base.GTQ'), ref('base.USD')])]"/>
+    </record>
+
+</odoo>

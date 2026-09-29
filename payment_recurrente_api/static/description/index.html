@@ -1,0 +1,147 @@
+<!-- NioSystems style: engineering sheet. Hard rules, no gradients, no shadows. Amber identifies the system; blue marks the signal path. -->
+<section class="container" style="padding-top:12px;padding-bottom:44px;">
+    <div class="row align-items-end">
+        <div class="col-lg-8">
+            <span class="d-inline-block" style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:12px;background-color:#C99A1A;color:#0F1117;padding:3px 10px;margin-bottom:14px;">NIOSYSTEMS / ODOO PAYMENT PROVIDER</span>
+            <h1 style="font-weight:900;font-size:48px;color:#0F1117;margin-bottom:14px;">RECURRENTE<br/>FOR ODOO</h1>
+            <p style="font-size:20px;color:#3A3F4B;margin-bottom:18px;">
+                A direct Recurrente payment provider for Odoo 20.0: hosted checkout, saved cards and refunds.
+                Requires a Recurrente account.
+            </p>
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:12px;color:#0F1117;margin-bottom:0px;">FREE / LGPL-3 / GTQ + USD / COMMUNITY + ENTERPRISE</div>
+        </div>
+        <div class="col-lg-4 mt-4 mt-lg-0">
+            <div style="border-left:4px solid #2350CC;padding-left:18px;">
+                <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:12px;color:#6B7280;margin-bottom:5px;">SYSTEM</div>
+                <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-weight:700;font-size:17px;color:#0F1117;margin-bottom:14px;">ODOO &rarr; RECURRENTE</div>
+                <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:12px;color:#6B7280;margin-bottom:5px;">VERSION</div>
+                <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-weight:700;font-size:17px;color:#0F1117;">ODOO 20</div>
+            </div>
+        </div>
+    </div>
+    <div style="margin-top:34px;border-top:2px solid #0F1117;border-bottom:2px solid #0F1117;padding:14px 0;">
+        <div class="row">
+            <div class="col-md-4 mb-2 mb-md-0"><span style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:12px;color:#6B7280;">01</span><span style="margin-left:10px;">Hosted checkout</span></div>
+            <div class="col-md-4 mb-2 mb-md-0"><span style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:12px;color:#6B7280;">02</span><span style="margin-left:10px;">Saved payment methods</span></div>
+            <div class="col-md-4"><span style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:12px;color:#6B7280;">03</span><span style="margin-left:10px;">Refunds with idempotency</span></div>
+        </div>
+    </div>
+</section>
+<section class="container" style="border-top:2px solid #0F1117;padding-top:38px;padding-bottom:42px;">
+    <div class="row">
+        <div class="col-md-2">
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:48px;font-weight:900;color:#2350CC;">01</div>
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:11px;color:#6B7280;margin-top:8px;">PAYMENT FLOW</div>
+        </div>
+        <div class="col-md-10">
+            <h2 style="font-weight:900;font-size:28px;color:#0F1117;margin-bottom:14px;">ONE PAYMENT. THREE OUTCOMES.</h2>
+            <p style="font-size:17px;color:#3A3F4B;margin-bottom:22px;">
+                The customer pays on Recurrente's hosted page. Odoo then reads the payment from Recurrente's API,
+                also triggered by a signed webhook, and marks the transaction as <b>paid</b>, <b>pending</b> or <b>failed</b>.
+            </p>
+            <div style="border-left:4px solid #2350CC;padding-left:20px;">
+                <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:13px;color:#0F1117;">CHECKOUT<span style="color:#6B7280;"> &rarr; </span>RECURRENTE API<span style="color:#6B7280;"> &rarr; </span>ODOO</div>
+                <div style="font-size:14px;color:#6B7280;margin-top:8px;">Neither the browser redirect nor the webhook body is trusted: the state is always fetched with your secret key.</div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="container" style="border-top:2px solid #0F1117;padding-top:38px;padding-bottom:42px;">
+    <div class="row">
+        <div class="col-md-2">
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:48px;font-weight:900;color:#2350CC;">02</div>
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:11px;color:#6B7280;margin-top:8px;">CAPABILITIES</div>
+        </div>
+        <div class="col-md-10">
+            <div class="row">
+                <div class="col-md-6 mb-4"><h3 style="font-weight:900;font-size:18px;color:#0F1117;margin-bottom:8px;">PAYMENTS</h3><p style="color:#3A3F4B;margin-bottom:0;">Hosted checkout for website sales, invoice payment links and customer portal payments. GTQ and USD. Card data never reaches your Odoo server.</p></div>
+                <div class="col-md-6 mb-4"><h3 style="font-weight:900;font-size:18px;color:#0F1117;margin-bottom:8px;">SAVED CARDS</h3><p style="color:#3A3F4B;margin-bottom:0;">Save a card while paying, then charge it again when Odoo asks for it, for example from Subscriptions. Failed charges report Recurrente's reason.</p></div>
+                <div class="col-md-6 mb-4"><h3 style="font-weight:900;font-size:18px;color:#0F1117;margin-bottom:8px;">REFUNDS</h3><p style="color:#3A3F4B;margin-bottom:0;">Full and partial refunds from the transaction (partial when the processor allows it). Requests carry an idempotency key, so a retry never refunds twice.</p></div>
+                <div class="col-md-6 mb-4"><h3 style="font-weight:900;font-size:18px;color:#0F1117;margin-bottom:8px;">SECURITY</h3><p style="color:#3A3F4B;margin-bottom:0;">Signed (Svix) webhooks, API verification, test and live keys kept apart, and credentials cleared when a database is neutralized.</p></div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="container" style="border-top:2px solid #0F1117;padding-top:38px;padding-bottom:42px;">
+    <div class="row">
+        <div class="col-md-2">
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:48px;font-weight:900;color:#2350CC;">03</div>
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:11px;color:#6B7280;margin-top:8px;">SETUP</div>
+        </div>
+        <div class="col-md-10">
+            <h2 style="font-weight:900;font-size:28px;color:#0F1117;margin-bottom:20px;">FIVE MINUTES TO THE SANDBOX</h2>
+            <div style="border-left:3px solid #0F1117;padding-left:20px;">
+            <div style="margin-bottom:18px;"><span style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-weight:700;color:#2350CC;">01</span><span style="margin-left:14px;">Install the module and open <i>Accounting &gt; Configuration &gt; Payment Providers &gt; Recurrente</i>.</span></div>
+            <div style="margin-bottom:18px;"><span style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-weight:700;color:#2350CC;">02</span><span style="margin-left:14px;">Paste the <b>secret key</b>: <code style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;background-color:#2350CC;color:#fff;padding:2px 7px;font-size:13px;">sk_test_...</code> for a Sandbox, <code style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;background-color:#2350CC;color:#fff;padding:2px 7px;font-size:13px;">sk_live_...</code> for real payments.</span></div>
+            <div style="margin-bottom:18px;"><span style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-weight:700;color:#2350CC;">03</span><span style="margin-left:14px;">In Recurrente, register a webhook to <code style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;background-color:#2350CC;color:#fff;padding:2px 7px;font-size:13px;">https://your-domain/payment/recurrente_api/webhook</code> with the <code style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;background-color:#2350CC;color:#fff;padding:2px 7px;font-size:13px;">intent.*</code> events and <code style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;background-color:#2350CC;color:#fff;padding:2px 7px;font-size:13px;">refund.create</code>. Paste its signing secret (<code style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;background-color:#2350CC;color:#fff;padding:2px 7px;font-size:13px;">whsec_...</code>) in Odoo.</span></div>
+            <div style="margin-bottom:18px;"><span style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-weight:700;color:#2350CC;">04</span><span style="margin-left:14px;">Set <i>Test Mode</i> and run a Sandbox payment with the card <code style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;background-color:#2350CC;color:#fff;padding:2px 7px;font-size:13px;">4242 4242 4242 4242</code>. Enable the provider when ready.</span></div>
+            <div style="margin-bottom:0px;"><span style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-weight:700;color:#2350CC;">05</span><span style="margin-left:14px;">Optional: enable <i>Allow Saving Payment Methods</i> so customers can save their card.</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="container" style="border-top:2px solid #0F1117;padding-top:38px;padding-bottom:42px;">
+    <div class="row">
+        <div class="col-md-2">
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:48px;font-weight:900;color:#2350CC;">04</div>
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:11px;color:#6B7280;margin-top:8px;">EVIDENCE</div>
+        </div>
+        <div class="col-md-10">
+            <h2 style="font-weight:900;font-size:28px;color:#0F1117;margin-bottom:10px;">SEE THE SYSTEM, NOT A MOCKUP</h2>
+
+            <div class="row">
+                <div class="col-12 mb-4"><img class="img-fluid" style="border:2px solid #0F1117;" src="demo.gif" alt="Full checkout flow: pay with Recurrente and return to Odoo confirmed"/></div>
+                <div class="col-md-6 mb-4"><img class="img-fluid" style="border:2px solid #0F1117;" src="provider_form.png" alt="Recurrente payment provider configuration in Odoo"/></div>
+                <div class="col-md-6 mb-4"><img class="img-fluid" style="border:2px solid #0F1117;" src="checkout_option.png" alt="Recurrente payment option at Odoo checkout"/></div>
+                <div class="col-md-6 mb-4"><img class="img-fluid" style="border:2px solid #0F1117;" src="saved_card.png" alt="Saved Recurrente payment method in Odoo"/></div>
+                <div class="col-md-6 mb-4"><img class="img-fluid" style="border:2px solid #0F1117;" src="refund.png" alt="Recurrente refund from an Odoo payment transaction"/></div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="container" style="border-top:2px solid #0F1117;padding-top:38px;padding-bottom:42px;">
+    <div class="row">
+        <div class="col-md-2">
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:48px;font-weight:900;color:#2350CC;">05</div>
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:11px;color:#6B7280;margin-top:8px;">DATA SENT</div>
+        </div>
+        <div class="col-md-10">
+            <h2 style="font-weight:900;font-size:28px;color:#0F1117;margin-bottom:10px;">DATA SENT TO RECURRENTE</h2>
+            <p style="color:#3A3F4B;">This module connects Odoo to an external service. When a customer pays, Odoo sends to Recurrente's API:</p>
+            <ul style="padding-left:20px;color:#3A3F4B;"><li style="margin-bottom:8px;">The <b>amount</b>, the <b>currency</b> and the <b>transaction reference</b>.</li><li style="margin-bottom:8px;">The <b>product lines</b> (name and price) and your <b>company name</b> as the payment description.</li><li style="margin-bottom:8px;">The <b>return, cancel and webhook URLs</b> of your Odoo database.</li><li style="margin-bottom:8px;">Your <b>secret key</b>, only as the authentication header of each request.</li><li style="margin-bottom:8px;">For a saved card: the Recurrente payment-method id, never the card number.</li></ul>
+            <p style="color:#3A3F4B;margin-bottom:0;">Card details are typed on Recurrente's page and never pass through Odoo. Logs keep identifiers only, no names, emails or phones.</p>
+        </div>
+    </div>
+</section>
+<section class="container" style="border-top:2px solid #0F1117;padding-top:38px;padding-bottom:42px;">
+    <div class="row">
+        <div class="col-md-2">
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:48px;font-weight:900;color:#2350CC;">06</div>
+            <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:11px;color:#6B7280;margin-top:8px;">BOUNDARIES</div>
+        </div>
+        <div class="col-md-10">
+            <h2 style="font-weight:900;font-size:28px;color:#0F1117;margin-bottom:18px;">BEFORE PRODUCTION</h2>
+            <div style="border-top:1px solid #0F1117;">
+                <div style="padding:14px 0;border-bottom:1px solid #0F1117;"><b>Account required.</b><span style="color:#6B7280;"> A Recurrente account is required for the provider to operate.</span></div>
+                <div style="padding:14px 0;border-bottom:1px solid #0F1117;"><b>Saved cards.</b><span style="color:#6B7280;"> Charging them needs one-time payments with a saved payment method enabled for your account; ask Recurrente if it is not. Cards are saved while paying; adding one without paying is not available yet.</span></div>
+                <div style="padding:14px 0;"><b>Refunds.</b><span style="color:#6B7280;"> Card and Recurrente Balance payments only, within 30 days and with enough balance; the processing fee is not returned. Partial refunds depend on the card processor.</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+<section class="container" style="padding-bottom:18px;">
+    <div style="background-color:#0F1117;color:#FFFFFF;padding:28px 24px;">
+        <div class="d-inline-block" style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:11px;background-color:#C99A1A;color:#0F1117;padding:2px 8px;margin-bottom:12px;">NIOSYSTEMS / OPEN INFRASTRUCTURE</div>
+        <div class="row align-items-end">
+            <div class="col-md-8">
+                <h2 style="font-weight:900;font-size:28px;color:#FFFFFF;margin-bottom:8px;">BUILT TO CONNECT. NOT TO HIDE THE SYSTEM.</h2>
+                <p style="color:#D1D5DB;margin-bottom:0;">Free and open source under LGPL-3. Developed by NioSystems.</p>
+            </div>
+            <div class="col-md-4 mt-3 mt-md-0">
+                <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:12px;color:#9CA3AF;">REPOSITORY (GITHUB)</div>
+                <div style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-weight:700;color:#FFFFFF;">niosystems/payment_recurrente</div>
+            </div>
+        </div>
+    </div>
+    <p class="text-center" style="font-family:ui-monospace,'SF Mono','Roboto Mono','Courier New',monospace;font-size:10px;color:#6B7280;margin-top:14px;margin-bottom:0;">RECURRENTE IS A TRADEMARK OF ITS OWNER. THIS MODULE IS NOT AN OFFICIAL RECURRENTE PRODUCT.</p>
+</section>
