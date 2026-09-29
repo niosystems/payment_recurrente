@@ -18,7 +18,7 @@ Leyenda: ✅ cumple · ⚠️ decisión o dato pendiente · ❌ incumple y hay q
 
 | Guía | Estado | Detalle |
 |---|---|---|
-| `name` de máximo 25 caracteres, explícito, sin adjetivos ni nombre de empresa | ✅ | `Recurrente Payments` (19 caracteres). |
+| `name` de máximo 25 caracteres, explícito, sin adjetivos ni nombre de empresa | ✅ | `Recurrente Checkout` (20 caracteres). Se cambió de `Recurrente Payments` porque ya existe una app de otro autor con ese nombre exacto en la tienda. |
 | Mismo nombre en todas las versiones de Odoo | ✅ | Aplicado en `19.0` y `20.0`. |
 | `version` con la versión de Odoo y formato mayor.menor.corrección | ✅ | `19.0.1.0.0`. |
 | Apps en beta con versión menor a 1.0 | ✅ | Se publica `1.0.0`: ya hubo cobros y reembolsos reales en modo *live*, con fondos propios. |
@@ -62,7 +62,7 @@ Leyenda: ✅ cumple · ⚠️ decisión o dato pendiente · ❌ incumple y hay q
 | Criterio | Estado |
 |---|---|
 | Tiene icono | ✅ (`icon.png`, 128×128, cuadrado) |
-| Tiene imagen de portada (thumbnail) | ⚠️ Falta `banner.png` propio de esta versión y la clave `images` del manifest |
+| Tiene imagen de portada (thumbnail) | ✅ `banner.png` propio de 19.0 y clave `images` del manifest activos |
 | Licencia definida | ✅ |
 | Valoración mayor o igual a 3 | — (aún sin valoraciones) |
 | Descripción en HTML | ✅ |
@@ -73,16 +73,16 @@ Todos van en `payment_recurrente_api/static/description/`, en inglés, con el **
 
 | Archivo | Estado en esta rama | Qué mostrar | Formato |
 |---|---|---|---|
-| `banner.png` | ⏳ Pendiente | Portada: logo de Recurrente y el texto "Recurrente Payments", con el texto de versión en **Odoo 19**. No reutilizar el `banner.png` de la rama `20.0`: dice "Odoo 20.0". | PNG, proporción 2:1 (por ejemplo 1120×560) |
+| `banner.png` | ✅ Lista | Portada propia de esta rama, con el texto de versión en **Odoo 19.0**. | PNG, proporción 2:1 (por ejemplo 1120×560) |
 | `provider_form.png` | ✅ Lista | Ficha del proveedor con *Secret Key* y *Webhook Signing Secret* (difuminados), modo de prueba y pestaña *Payment Methods*. | PNG, ancho ≥ 1200 px |
 | `checkout_option.png` | ✅ Lista | El pago en la tienda web o en una factura, con **Recurrente** como opción. | PNG |
 | `saved_card.png` | ✅ Lista | Ficha de un contacto (o *Payment Tokens*) con una tarjeta guardada `•••• 4242`. | PNG |
 | `refund.png` | ✅ Lista | Transacción confirmada con el botón de reembolso, o la transacción hija `R-...` confirmada. | PNG |
 | `demo.gif` | ⏳ Pendiente | Flujo completo de 15 a 25 segundos: elegir Recurrente, pagar en el Sandbox con `4242 4242 4242 4242`, volver a Odoo y ver la transacción confirmada. **Grabar en una base Odoo 19**, no reutilizar el de `20.0`: en un fotograma se alcanza a leer el nombre del entorno de pruebas con "20-0" en la URL. | GIF, menos de 5 MB |
 
-`provider_form.png`, `checkout_option.png`, `saved_card.png` y `refund.png` son capturas del backend/checkout de Odoo sin ningún indicador de versión visible, así que se reutilizaron de la rama `20.0` y ya están conectadas en `index.html`. `banner.png` y `demo.gif` sí delatan la versión (texto explícito o el nombre del entorno) y quedan pendientes de recapturar específicamente en 19.0.
+`provider_form.png`, `checkout_option.png`, `saved_card.png` y `refund.png` son capturas del backend/checkout de Odoo sin ningún indicador de versión visible, así que se reutilizaron de la rama `20.0` y ya están conectadas en `index.html`. `banner.png` ya se recapturó con el texto "Odoo 19.0"; `demo.gif` sigue pendiente porque el de `20.0` delata el entorno de pruebas ("20-0" en la URL, visible un instante en la barra de estado).
 
-Cuando `banner.png` exista: descomenta la línea `"images"` en `__manifest__.py`. Cuando `demo.gif` exista: agrégalo como primera fila (`col-12`) del bloque de capturas en `index.html`, igual que en la rama `20.0`.
+Cuando `demo.gif` exista: agrégalo como primera fila (`col-12`) del bloque de capturas en `index.html`, igual que en la rama `20.0`.
 
 ## Antes de subir cada rama
 
@@ -91,6 +91,7 @@ Cuando `banner.png` exista: descomenta la línea `"images"` en `__manifest__.py`
 - [ ] El nombre del módulo es el mismo en las dos ramas.
 - [ ] No hay llaves, contraseñas ni datos reales en el código, en `static/` ni en las capturas.
 - [ ] El ZIP contiene la carpeta `payment_recurrente_api/` en su raíz, sin `__pycache__` ni `.git`.
+- [ ] `payment_recurrente_api/LICENSE` existe (copia del `LICENSE` de la raíz). El de la raíz no viaja en el ZIP ni lo ve el escáner de la tienda: sin esta copia dentro del módulo, la ficha no muestra la pestaña de licencia.
 
 ## Subida
 
