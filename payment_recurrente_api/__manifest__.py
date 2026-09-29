@@ -14,8 +14,7 @@
         "data/payment_method_data.xml",
         "data/payment_provider_data.xml",
     ],
-    # Uncomment once static/description/banner.png exists (see APP_STORE.md).
-    # "images": ["static/description/banner.png"],
+    "images": ["static/description/banner.png"],
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",
     "license": "LGPL-3",
