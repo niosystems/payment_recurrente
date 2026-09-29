@@ -1,10 +1,10 @@
-# Recurrente para Odoo 20
+# Recurrente para Odoo 19
 
-![Odoo 20.0](https://img.shields.io/badge/Odoo-20.0-714B67) ![License: LGPL--3](https://img.shields.io/badge/license-LGPL--3-blue)
+![Odoo 19.0](https://img.shields.io/badge/Odoo-19.0-714B67) ![License: LGPL--3](https://img.shields.io/badge/license-LGPL--3-blue)
 
-> Versión objetivo: **Odoo 20.0**. Ver [Versiones soportadas](#versiones-soportadas) para las demás ramas.
+> Versión objetivo: **Odoo 19.0 (Odoo.sh)**. Ver [Versiones soportadas](#versiones-soportadas) para las demás ramas.
 
-Proveedor de pago para Odoo 20 que cobra con el checkout hospedado de [Recurrente](https://docs.recurrente.com) (Guatemala, GTQ y USD). Se comunica directamente con `https://app.recurrente.com/api`, sin servidores intermedios.
+Proveedor de pago para Odoo 19 que cobra con el checkout hospedado de [Recurrente](https://docs.recurrente.com) (Guatemala, GTQ y USD). Se comunica directamente con `https://app.recurrente.com/api`, sin servidores intermedios.
 
 Módulo: [`payment_recurrente_api`](payment_recurrente_api). Escrito sobre el framework estándar de `payment`, con el mismo esquema que los proveedores incluidos en Odoo (`payment_mollie`, `payment_stripe`, ...).
 
@@ -30,8 +30,8 @@ Un módulo independiente por versión de Odoo, una rama por versión, publicado 
 |---|---|---|
 | `17.0` | 17.0 | ⏳ Planeada — API antigua de `payment` (`_get_tx_from_notification_data` / `_process_notification_data`) |
 | `18.0` | 18.0 | ⏳ Planeada |
-| `19.0` | 19.0 | ✅ Publicada |
-| `20.0` (esta rama) | 20.0 | ✅ Publicada |
+| `19.0` (esta rama) | 19.0 | ✅ Publicada |
+| `20.0` | 20.0 | ✅ Publicada |
 | `master` | próxima versión (21.0) | ⏳ Se abre cuando Odoo publique esa versión |
 
 Cada rama nueva se porta desde la más cercana ya publicada (por ejemplo, 18.0 nacerá de 19.0), así que su README solo documenta la diferencia con esa vecina, no con todas las anteriores.
@@ -40,7 +40,7 @@ Cada rama nueva se porta desde la más cercana ya publicada (por ejemplo, 18.0 n
 
 1. Al pagar, Odoo crea un checkout (`POST /checkouts`) y guarda su id en `provider_reference`.
 2. El cliente paga en la página de Recurrente y regresa a `/payment/recurrente_api/return` (o `/cancel`).
-3. Odoo **nunca deduce el estado del pago de la petición recibida**: consulta `GET /checkouts/{id}` con la llave secreta y registra el resultado con `_record()`. El cron estándar de `payment` lo procesa (`_apply_updates` y validación de monto/moneda).
+3. Odoo **nunca deduce el estado del pago de la petición recibida**: consulta `GET /checkouts/{id}` con la llave secreta y lo procesa con `_process()` (validación de monto/moneda y `_apply_updates`).
 4. Los webhooks (`intent.*` y `refund.create`) solo sirven para identificar el checkout y disparar esa misma consulta. Se verifican con la firma Svix (`whsec_...`).
 
 | Estado del checkout en Recurrente | Estado de la transacción |
@@ -53,7 +53,7 @@ Cada rama nueva se porta desde la más cercana ya publicada (por ejemplo, 18.0 n
 ## Configuración
 
 1. Instalar el módulo y abrir *Facturación > Configuración > Proveedores de pago > Recurrente*.
-2. Pegar la **llave secreta** (`sk_test_...` o `sk_live_...`). La llave decide el ambiente en Recurrente; el módulo rechaza combinaciones incoherentes (llave de prueba con `is_live` activo y viceversa).
+2. Pegar la **llave secreta** (`sk_test_...` o `sk_live_...`). La llave decide el ambiente en Recurrente; el módulo rechaza combinaciones incoherentes (llave de prueba con el proveedor habilitado y llave live en modo de prueba).
 3. Registrar un webhook en Recurrente apuntando a:
 
    ```
@@ -62,7 +62,7 @@ Cada rama nueva se porta desde la más cercana ya publicada (por ejemplo, 18.0 n
 
    Suscribirlo a los eventos **`intent.*`** y **`refund.create`**. Los eventos legacy (`payment_intent.*`, ...) se ignoran para no procesar un pago dos veces.
 4. Pegar el `signingSecret` (`whsec_...`) que devuelve Recurrente en *Webhook Signing Secret*. Sin él, los webhooks se aceptan sin verificar firma (sigue siendo seguro porque el estado siempre se consulta a la API, pero se recomienda configurarlo).
-5. Marcar `is_live` según el tipo de llave (desactivado con `sk_test_...`, activado con `sk_live_...`) y publicar el proveedor. Con una llave de prueba equivale al *Modo de prueba* de la rama 19.0.
+5. Poner el proveedor en **Modo de prueba** (o *Habilitado* con una llave `sk_live_...`); eso también activa el método de pago *Recurrente*.
 
 Para probar sin dinero real usa un [Sandbox de Recurrente](https://docs.recurrente.com/guides-english/getting-started/introduction) (tarjeta `4242 4242 4242 4242`).
 
@@ -96,7 +96,7 @@ Límites de Recurrente que Odoo no puede saltarse (el error de la API se muestra
 
 La lógica de negocio (checkout, estados, reembolsos, firma Svix) es la misma. Cambia solo el framework de `payment` de Odoo:
 
-| Tema | 19.0 | 20.0 (esta rama) |
+| Tema | 19.0 (esta rama) | 20.0 |
 |---|---|---|
 | Modo del proveedor | `state`: `disabled` / `test` / `enabled` | `is_live` + `is_published` |
 | Procesar datos del pago | `tx._process(code, data)`, síncrono | `tx._record(data)` → `payment.data` + cron → `tx._process(data)` |

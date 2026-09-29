@@ -1,6 +1,6 @@
 {
     "name": "Recurrente Payments",
-    "version": "20.0.1.0.0",
+    "version": "19.0.1.0.0",
     "category": "Accounting/Payment Providers",
     "summary": "Accept payments in Guatemala with Recurrente: checkout, saved cards and refunds.",
     "description": "Connector to the external service Recurrente. When a customer pays, Odoo sends the amount, currency, transaction reference, product lines, company name and return/webhook URLs to Recurrente's API. Card data never passes through Odoo.",
@@ -9,11 +9,13 @@
     "website": "https://github.com/niosystems/payment_recurrente",
     "depends": ["payment"],
     "data": [
+        "views/payment_recurrente_api_templates.xml",
         "views/payment_provider_views.xml",
-        "data/payment_provider_data.xml",
         "data/payment_method_data.xml",
+        "data/payment_provider_data.xml",
     ],
-    "images": ["static/description/banner.png"],
+    # Uncomment once static/description/banner.png exists (see APP_STORE.md).
+    # "images": ["static/description/banner.png"],
     "post_init_hook": "post_init_hook",
     "uninstall_hook": "uninstall_hook",
     "license": "LGPL-3",

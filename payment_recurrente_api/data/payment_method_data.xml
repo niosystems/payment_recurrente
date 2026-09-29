@@ -7,8 +7,8 @@
         <field name="name">Recurrente</field>
         <field name="code">recurrente</field>
         <field name="sequence">10</field>
-        <field name="provider_id" ref="payment_recurrente_api.payment_provider_recurrente_api"/>
-        <field name="image" type="bytes" file="payment_recurrente_api/static/img/recurrente.png"/>
+        <field name="active">False</field>
+        <field name="image" type="base64" file="payment_recurrente_api/static/img/recurrente.png"/>
         <field name="support_tokenization">True</field>
         <field name="support_refund">partial</field>
         <field name="supported_currency_ids"

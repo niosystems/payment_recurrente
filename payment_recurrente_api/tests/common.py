@@ -23,18 +23,13 @@ def sign_webhook(body, secret=WEBHOOK_SECRET, svix_id="msg_test", timestamp=None
 
 
 class RecurrenteApiCommon(PaymentCommon):
-    def _create_transaction(self, flow, sudo=True, **values):
-        """Create a transaction that can be updated like it is while its data is processed.
+    def _update_transaction(self, transaction, **values):
+        transaction.write(values)
+        return transaction
 
-        Requests that Odoo makes outside of the processing, like charging a saved card or
-        refunding, are tested with `with_context(payment_safe_write=False)` to make sure they
-        never write on the transaction directly.
-        """
-        tx = super()._create_transaction(flow, sudo=sudo, **values)
-        return tx.with_context(payment_safe_write=True)
-
-    def _assert_processed_with(self, transaction, payment_data):
-        self.assertEqual([data.payload for data in transaction.payment_data_ids], [payment_data])
+    def _assert_processed_with(self, transaction, payment_data):  # noqa: ARG002
+        self.assertEqual(transaction.state, "done")
+        self.assertEqual(transaction.provider_reference, payment_data["id"])
 
     @classmethod
     def setUpClass(cls):

@@ -18,7 +18,7 @@ class PaymentProvider(models.Model):
     recurrente_api_secret_key = fields.Char(
         string="Secret Key",
         help="The secret API key (`sk_test_...` or `sk_live_...`) from Recurrente's Settings > API"
-        " Keys. The key, not the Odoo mode, decides whether Recurrente processes real payments.",
+        " Keys. The key, not the Odoo state, decides whether Recurrente processes real payments.",
         required_if_provider=const.PROVIDER_CODE,
         copy=False,
         groups="base.group_system",
@@ -33,16 +33,18 @@ class PaymentProvider(models.Model):
 
     # === CONSTRAINT METHODS === #
 
-    @api.constrains("is_live", "recurrente_api_secret_key")
-    def _check_recurrente_api_key_matches_mode(self):
-        """Prevent test keys from being used in live mode and live keys in test mode."""
+    @api.constrains("state", "recurrente_api_secret_key")
+    def _check_recurrente_api_key_matches_state(self):
+        """Prevent test keys from being used when enabled and live keys in test mode."""
         for provider in self.filtered(lambda p: p.code == const.PROVIDER_CODE):
             key = provider.recurrente_api_secret_key or ""
-            if provider.is_live and key.startswith("sk_test_"):
+            if provider.state == "enabled" and key.startswith("sk_test_"):
                 raise ValidationError(
-                    self.env._("A Recurrente test key cannot be used while the provider is live.")
+                    self.env._(
+                        "A Recurrente test key cannot be used while the provider is enabled."
+                    )
                 )
-            if not provider.is_live and key.startswith("sk_live_"):
+            if provider.state == "test" and key.startswith("sk_live_"):
                 raise ValidationError(
                     self.env._(
                         "A Recurrente live key cannot be used while the provider is in test mode:"
@@ -63,13 +65,13 @@ class PaymentProvider(models.Model):
         )
 
     @api.model
-    def _find_available_providers(self, *args, is_validation=False, **kwargs):
+    def _get_compatible_providers(self, *args, is_validation=False, **kwargs):
         """Override of `payment` to filter out Recurrente for validation operations.
 
         Saving a card without paying (a validation) would need a `setup` checkout and the matching
         Recurrente customer, which is not supported yet. Cards are saved while paying instead.
         """
-        providers = super()._find_available_providers(*args, is_validation=is_validation, **kwargs)
+        providers = super()._get_compatible_providers(*args, is_validation=is_validation, **kwargs)
         if is_validation:
             providers = providers.filtered(lambda p: p.code != const.PROVIDER_CODE)
         return providers

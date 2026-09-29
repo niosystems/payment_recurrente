@@ -1,5 +1,5 @@
 from datetime import timedelta
-from urllib.parse import urlencode
+from urllib.parse import parse_qsl, urlencode, urlparse
 
 from odoo import api, fields, models
 from odoo.exceptions import ValidationError
@@ -42,8 +42,7 @@ class PaymentTransaction(models.Model):
         checkout_url = checkout["checkout_url"]
         return {
             "api_url": checkout_url,
-            "http_method": "get",
-            "url_params": payment_utils.extract_url_params(checkout_url),
+            "url_params": dict(parse_qsl(urlparse(checkout_url).query)),
         }
 
     def _recurrente_api_prepare_checkout_payload(self):
@@ -209,7 +208,7 @@ class PaymentTransaction(models.Model):
             idempotency_key=payment_utils.generate_idempotency_key(self, scope="refund"),
         )
 
-        self._record(refund)
+        self._process(const.PROVIDER_CODE, refund)
 
     def _recurrente_api_get_source_intent_id(self):
         """Return the id of the Recurrente intent that the refund's source transaction paid.
@@ -329,7 +328,7 @@ class PaymentTransaction(models.Model):
         intent = self._recurrente_api_find_intent(payment["id"])
         # The provider reference is set when the data is processed: transactions cannot be
         # written directly here, and the charge cannot be rolled back.
-        self._record(intent or payment)
+        self._process(const.PROVIDER_CODE, intent or payment)
 
     def _recurrente_api_find_intent(self, one_time_payment_id):
         """Find the unified intent of a one-time payment in the most recent intents.

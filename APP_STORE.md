@@ -1,4 +1,4 @@
-# Publicación en Odoo Apps (Odoo 20.0)
+# Publicación en Odoo Apps (Odoo 19.0)
 
 Checklist de las [guías para vendedores de Odoo Apps](https://apps.odoo.com/apps/vendor-guidelines) aplicado a `payment_recurrente_api`. El módulo es **gratuito**: el manifest no lleva `price` ni `currency`.
 
@@ -20,7 +20,7 @@ Leyenda: ✅ cumple · ⚠️ decisión o dato pendiente · ❌ incumple y hay q
 |---|---|---|
 | `name` de máximo 25 caracteres, explícito, sin adjetivos ni nombre de empresa | ✅ | `Recurrente Payments` (19 caracteres). |
 | Mismo nombre en todas las versiones de Odoo | ✅ | Aplicado en `19.0` y `20.0`. |
-| `version` con la versión de Odoo y formato mayor.menor.corrección | ✅ | `20.0.1.0.0`. |
+| `version` con la versión de Odoo y formato mayor.menor.corrección | ✅ | `19.0.1.0.0`. |
 | Apps en beta con versión menor a 1.0 | ✅ | Se publica `1.0.0`: ya hubo cobros y reembolsos reales en modo *live*, con fondos propios. |
 | `license` | ✅ | LGPL-3, con el texto completo en `LICENSE`. |
 | `depends` completo y existente | ✅ | Solo `payment`. Sin librerías Python externas (la firma Svix está implementada en el módulo). |
@@ -62,7 +62,7 @@ Leyenda: ✅ cumple · ⚠️ decisión o dato pendiente · ❌ incumple y hay q
 | Criterio | Estado |
 |---|---|
 | Tiene icono | ✅ (`icon.png`, 128×128, cuadrado) |
-| Tiene imagen de portada (thumbnail) | ⚠️ Falta `banner.png` y la clave `images` del manifest |
+| Tiene imagen de portada (thumbnail) | ⚠️ Falta `banner.png` propio de esta versión y la clave `images` del manifest |
 | Licencia definida | ✅ |
 | Valoración mayor o igual a 3 | — (aún sin valoraciones) |
 | Descripción en HTML | ✅ |
@@ -71,16 +71,18 @@ Leyenda: ✅ cumple · ⚠️ decisión o dato pendiente · ❌ incumple y hay q
 
 Todos van en `payment_recurrente_api/static/description/`, en inglés, con el **Sandbox**, **sin llaves visibles** (difumina `sk_...` y `whsec_...`) y sin datos reales de clientes.
 
-| Archivo | Qué mostrar | Formato |
-|---|---|---|
-| `banner.png` | Portada: logo de Recurrente y el texto "Recurrente Payments". | PNG, proporción 2:1 (por ejemplo 1120×560) |
-| `provider_form.png` | Ficha del proveedor con *Secret Key* y *Webhook Signing Secret* (difuminados), modo de prueba y pestaña *Payment Methods*. | PNG, ancho ≥ 1200 px |
-| `checkout_option.png` | El pago en la tienda web o en una factura, con **Recurrente** como opción. | PNG |
-| `saved_card.png` | Ficha de un contacto (o *Payment Tokens*) con una tarjeta guardada `•••• 4242`. | PNG |
-| `refund.png` | Transacción confirmada con el botón de reembolso, o la transacción hija `R-...` confirmada. | PNG |
-| `demo.gif` | Flujo completo de 15 a 25 segundos: elegir Recurrente, pagar en el Sandbox con `4242 4242 4242 4242`, volver a Odoo y ver la transacción confirmada. | GIF, menos de 5 MB |
+| Archivo | Estado en esta rama | Qué mostrar | Formato |
+|---|---|---|---|
+| `banner.png` | ⏳ Pendiente | Portada: logo de Recurrente y el texto "Recurrente Payments", con el texto de versión en **Odoo 19**. No reutilizar el `banner.png` de la rama `20.0`: dice "Odoo 20.0". | PNG, proporción 2:1 (por ejemplo 1120×560) |
+| `provider_form.png` | ✅ Lista | Ficha del proveedor con *Secret Key* y *Webhook Signing Secret* (difuminados), modo de prueba y pestaña *Payment Methods*. | PNG, ancho ≥ 1200 px |
+| `checkout_option.png` | ✅ Lista | El pago en la tienda web o en una factura, con **Recurrente** como opción. | PNG |
+| `saved_card.png` | ✅ Lista | Ficha de un contacto (o *Payment Tokens*) con una tarjeta guardada `•••• 4242`. | PNG |
+| `refund.png` | ✅ Lista | Transacción confirmada con el botón de reembolso, o la transacción hija `R-...` confirmada. | PNG |
+| `demo.gif` | ⏳ Pendiente | Flujo completo de 15 a 25 segundos: elegir Recurrente, pagar en el Sandbox con `4242 4242 4242 4242`, volver a Odoo y ver la transacción confirmada. **Grabar en una base Odoo 19**, no reutilizar el de `20.0`: en un fotograma se alcanza a leer el nombre del entorno de pruebas con "20-0" en la URL. | GIF, menos de 5 MB |
 
-Cuando existan: quita los marcadores `<!--` y `-->` alrededor de los `<img>` en `index.html` (solo los de archivos que existan) y descomenta la línea `"images"` en `__manifest__.py`.
+`provider_form.png`, `checkout_option.png`, `saved_card.png` y `refund.png` son capturas del backend/checkout de Odoo sin ningún indicador de versión visible, así que se reutilizaron de la rama `20.0` y ya están conectadas en `index.html`. `banner.png` y `demo.gif` sí delatan la versión (texto explícito o el nombre del entorno) y quedan pendientes de recapturar específicamente en 19.0.
+
+Cuando `banner.png` exista: descomenta la línea `"images"` en `__manifest__.py`. Cuando `demo.gif` exista: agrégalo como primera fila (`col-12`) del bloque de capturas en `index.html`, igual que en la rama `20.0`.
 
 ## Antes de subir cada rama
 
@@ -95,7 +97,7 @@ Cuando existan: quita los marcadores `<!--` y `-->` alrededor de los `<img>` en 
 Se sube una vez **por versión de Odoo** (una rama, un ZIP), con la misma cuenta y el mismo nombre de módulo. Para generar el ZIP desde la raíz de este repositorio:
 
 ```bash
-git archive --format=zip --prefix=payment_recurrente_api/ -o payment_recurrente_api_20.0.zip HEAD:payment_recurrente_api
+git archive --format=zip --prefix=payment_recurrente_api/ -o payment_recurrente_api_19.0.zip HEAD:payment_recurrente_api
 ```
 
 `git archive` solo incluye archivos versionados, así que no arrastra basura local.
@@ -103,4 +105,4 @@ git archive --format=zip --prefix=payment_recurrente_api/ -o payment_recurrente_
 ## Mantenimiento
 
 - Una corrección que aplique a las dos ramas se copia con `git cherry-pick`; **no** hagas merge entre `19.0` y `20.0` (los frameworks de `payment` difieren; ver la tabla del `README.md`).
-- Sube una versión nueva cada vez que cambie el comportamiento (`20.0.1.1.0`, ...). Las versiones anteriores de Odoo no se actualizan solas.
+- Sube una versión nueva cada vez que cambie el comportamiento (`19.0.1.1.0`, ...). Las versiones anteriores de Odoo no se actualizan solas.

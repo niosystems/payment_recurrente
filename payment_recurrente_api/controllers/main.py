@@ -40,7 +40,7 @@ class RecurrenteApiController(http.Controller):
             ._search_by_reference(const.PROVIDER_CODE, data)
         )
         if tx_sudo:
-            self._fetch_and_record(tx_sudo)
+            self._fetch_and_process(tx_sudo)
         return request.redirect("/payment/status")
 
     @http.route(
@@ -63,7 +63,7 @@ class RecurrenteApiController(http.Controller):
             if not payment_utils.check_access_token(access_token, tx_sudo.reference):
                 _logger.warning("Received a cancellation with an invalid access token.")
                 raise Forbidden
-            self._fetch_and_record(tx_sudo, extra_data={const.RETURN_CANCEL_FLAG: True})
+            self._fetch_and_process(tx_sudo, extra_data={const.RETURN_CANCEL_FLAG: True})
         return request.redirect("/payment/status")
 
     @http.route(_webhook_url, type="http", auth="public", methods=["POST"], csrf=False)
@@ -112,7 +112,7 @@ class RecurrenteApiController(http.Controller):
             return ""  # Unknown checkout, e.g. created outside of Odoo.
 
         self._verify_webhook_signature(tx_sudo.provider_id, body)
-        if not self._fetch_and_record(tx_sudo):
+        if not self._fetch_and_process(tx_sudo):
             raise ServiceUnavailable
         return ""
 
@@ -146,12 +146,12 @@ class RecurrenteApiController(http.Controller):
             raise Forbidden
 
     @staticmethod
-    def _fetch_and_record(tx_sudo, extra_data=None):
-        """Fetch the checkout (or refund) of the transaction and record it for processing.
+    def _fetch_and_process(tx_sudo, extra_data=None):
+        """Fetch the checkout (or refund) of the transaction and process it.
 
         :param payment.transaction tx_sudo: The transaction whose checkout or refund to fetch.
         :param dict extra_data: Data to add to the fetched object before recording it.
-        :return: Whether the object could be fetched and recorded.
+        :return: Whether the object could be fetched and processed.
         :rtype: bool
         """
         if not tx_sudo.provider_reference:
@@ -169,5 +169,5 @@ class RecurrenteApiController(http.Controller):
         except ValidationError:
             _logger.error("Unable to fetch the data of transaction %s.", tx_sudo.reference)
             return False
-        tx_sudo._record({**payment_data, **(extra_data or {})})
+        tx_sudo._process(const.PROVIDER_CODE, {**payment_data, **(extra_data or {})})
         return True

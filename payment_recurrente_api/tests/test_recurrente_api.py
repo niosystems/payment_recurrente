@@ -53,7 +53,6 @@ class RecurrenteApiModelTest(RecurrenteApiCommon):
 
         self.assertEqual(request_mock.call_args.args[:2], ("POST", "/checkouts"))
         self.assertEqual(values["api_url"], checkout_url)
-        self.assertEqual(values["http_method"], "get")
         self.assertEqual(tx.provider_reference, self.checkout_id)
 
     @mute_logger("odoo.addons.payment_recurrente_api.models.payment_transaction")
@@ -133,21 +132,21 @@ class RecurrenteApiModelTest(RecurrenteApiCommon):
         )
 
     def test_matching_amount_is_accepted(self):
-        self._disable_process_patcher()
         tx = self._create_transaction("redirect")
-        tx._process(self.checkout)
+        tx._process(const.PROVIDER_CODE, self.checkout)
         self.assertEqual(tx.state, "done")
 
     def test_amount_mismatch_sets_the_transaction_in_error(self):
-        self._disable_process_patcher()
         tx = self._create_transaction("redirect")
-        tx._process({**self.checkout, "total_in_cents": 100})
+        tx._process(const.PROVIDER_CODE, {**self.checkout, "total_in_cents": 100})
         self.assertEqual(tx.state, "error")
 
     def test_missing_amount_sets_the_transaction_in_error(self):
-        self._disable_process_patcher()
         tx = self._create_transaction("redirect")
-        tx._process({"id": self.checkout_id, "status": const.CHECKOUT_STATUS_PAID})
+        tx._process(
+            const.PROVIDER_CODE,
+            {"id": self.checkout_id, "status": const.CHECKOUT_STATUS_PAID},
+        )
         self.assertEqual(tx.state, "error")
 
     def test_only_supported_currencies_are_available(self):
@@ -162,17 +161,17 @@ class RecurrenteApiModelTest(RecurrenteApiCommon):
         headers = self.provider._build_request_headers("POST", "/checkouts", {})
         self.assertEqual(headers["X-SECRET-KEY"], "sk_test_dummy")
 
-    def test_test_key_is_refused_in_live_mode(self):
+    def test_test_key_is_refused_when_enabled(self):
         with self.assertRaises(ValidationError):
-            self.provider.write({"is_live": True, "recurrente_api_secret_key": "sk_test_dummy"})
+            self.provider.write({"state": "enabled", "recurrente_api_secret_key": "sk_test_dummy"})
 
     def test_live_key_is_refused_in_test_mode(self):
         with self.assertRaises(ValidationError):
-            self.provider.write({"is_live": False, "recurrente_api_secret_key": "sk_live_dummy"})
+            self.provider.write({"state": "test", "recurrente_api_secret_key": "sk_live_dummy"})
 
-    def test_live_key_is_accepted_in_live_mode(self):
-        self.provider.write({"is_live": True, "recurrente_api_secret_key": "sk_live_dummy"})
-        self.assertTrue(self.provider.is_live)
+    def test_live_key_is_accepted_when_enabled(self):
+        self.provider.write({"state": "enabled", "recurrente_api_secret_key": "sk_live_dummy"})
+        self.assertEqual(self.provider.state, "enabled")
 
 
 @tagged("post_install", "-at_install")
@@ -192,7 +191,11 @@ class RecurrenteApiRefundTest(RecurrenteApiCommon):
 
     def _send_refund(self, amount, refund=None, checkout=None):
         refund_tx = self.source_tx._create_child_transaction(amount, is_refund=True)
-        responses = [checkout or self.checkout_with_intent, refund or self.refund]
+        refund = refund or {
+            **self.refund,
+            "customer_refunded_amount_in_cents": round(amount * 100),
+        }
+        responses = [checkout or self.checkout_with_intent, refund]
         with patch(SEND_API_REQUEST, side_effect=responses) as request_mock:
             refund_tx.with_context(payment_safe_write=False)._send_refund_request()
         return refund_tx, request_mock
@@ -209,7 +212,7 @@ class RecurrenteApiRefundTest(RecurrenteApiCommon):
         self.assertEqual(post_call.args[:2], ("POST", "/refunds"))
         self.assertEqual(post_call.kwargs["json"], {"intent_id": "in_8c3a1f20"})
         self.assertTrue(post_call.kwargs["idempotency_key"])
-        self.assertEqual(len(refund_tx.payment_data_ids), 1)
+        self.assertEqual(refund_tx.state, "done")
 
     def test_partial_refund_sends_the_amount(self):
         _refund_tx, request_mock = self._send_refund(100.0)
@@ -218,8 +221,7 @@ class RecurrenteApiRefundTest(RecurrenteApiCommon):
         self.assertEqual(payload, {"intent_id": "in_8c3a1f20", "amount_in_cents": 10000})
 
     def test_refund_of_the_remaining_balance_omits_the_amount(self):
-        first_refund_tx, _request_mock = self._send_refund(100.0)
-        self._update_transaction(first_refund_tx, state="done")
+        self._send_refund(100.0)
 
         _refund_tx, request_mock = self._send_refund(self.source_tx.amount - 100.0)
 
@@ -279,9 +281,10 @@ class RecurrenteApiRefundTest(RecurrenteApiCommon):
         self.assertIsNone(refund_tx._extract_amount_data({"id": "re_3jfrywsf"}))
 
     def test_refund_amount_mismatch_sets_the_refund_transaction_in_error(self):
-        self._disable_process_patcher()
         refund_tx = self.source_tx._create_child_transaction(100.0, is_refund=True)
-        refund_tx._process({**self.refund, "customer_refunded_amount_in_cents": 5000})
+        refund_tx._process(
+            const.PROVIDER_CODE, {**self.refund, "customer_refunded_amount_in_cents": 5000}
+        )
         self.assertEqual(refund_tx.state, "error")
 
     def test_extract_reference_from_refund_webhook(self):
@@ -327,7 +330,7 @@ class RecurrenteApiTokenTest(RecurrenteApiCommon):
         self.assertTrue(self.payment_method.support_tokenization)
 
     def test_validation_operations_are_not_offered(self):
-        providers = self.env["payment.provider"]._find_available_providers(
+        providers = self.env["payment.provider"]._get_compatible_providers(
             self.env.company.id, self.partner.id, 0.0, is_validation=True
         )
         self.assertNotIn(self.provider, providers)
@@ -346,9 +349,8 @@ class RecurrenteApiTokenTest(RecurrenteApiCommon):
         )
 
     def test_paying_with_tokenization_saves_the_card(self):
-        self._disable_process_patcher()
         tx = self._create_transaction("redirect", tokenize=True)
-        tx._process({**self.checkout, "payment_method": self.card})
+        tx._process(const.PROVIDER_CODE, {**self.checkout, "payment_method": self.card})
         self.assertEqual(tx.state, "done")
         self.assertEqual(tx.token_id.provider_ref, "pay_m_7v5ie3pw")
         self.assertEqual(tx.token_id.payment_details, "4242")
@@ -442,9 +444,8 @@ class RecurrenteApiTokenTest(RecurrenteApiCommon):
         self.assertIsNone(tx._extract_amount_data(self.payment))
 
     def test_intent_with_another_amount_sets_the_transaction_in_error(self):
-        self._disable_process_patcher()
         tx = self._create_transaction("token", token_id=self.token.id)
-        tx._process({**self.intent, "amount_in_cents": 100})
+        tx._process(const.PROVIDER_CODE, {**self.intent, "amount_in_cents": 100})
         self.assertEqual(tx.state, "error")
 
     def test_extract_reference_of_a_saved_card_notification(self):
@@ -553,13 +554,11 @@ class RecurrenteApiControllerTest(RecurrenteApiCommon, PaymentHttpCommon):
 
     @mute_logger("odoo.addons.payment_recurrente_api.controllers.main")
     def test_webhook_confirms_the_transaction(self):
-        self._disable_process_patcher()
         tx = self._create_transaction("redirect")
         self._update_transaction(tx, provider_reference=self.checkout_id)
 
         with patch(SEND_API_REQUEST, return_value=self.checkout) as request_mock:
             response = self._post_webhook(self._webhook_payload())
-        self._run_processing()
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(request_mock.call_args.args[:2], ("GET", f"/checkouts/{self.checkout_id}"))
@@ -612,7 +611,6 @@ class RecurrenteApiControllerTest(RecurrenteApiCommon, PaymentHttpCommon):
 
     @mute_logger("odoo.addons.payment_recurrente_api.controllers.main")
     def test_return_confirms_the_transaction(self):
-        self._disable_process_patcher()
         tx = self._create_transaction("redirect")
         self._update_transaction(tx, provider_reference=self.checkout_id)
 
@@ -620,13 +618,11 @@ class RecurrenteApiControllerTest(RecurrenteApiCommon, PaymentHttpCommon):
             self._make_http_get_request(
                 self._build_url(RecurrenteApiController._return_url), params={"ref": tx.reference}
             )
-        self._run_processing()
 
         self.assertEqual(tx.state, "done")
 
     @mute_logger("odoo.addons.payment_recurrente_api.controllers.main")
     def test_cancel_with_valid_token_cancels_the_transaction(self):
-        self._disable_process_patcher()
         tx = self._create_transaction("redirect")
         self._update_transaction(tx, provider_reference=self.checkout_id)
         params = {
@@ -638,7 +634,6 @@ class RecurrenteApiControllerTest(RecurrenteApiCommon, PaymentHttpCommon):
             self._make_http_get_request(
                 self._build_url(RecurrenteApiController._cancel_url), params=params
             )
-        self._run_processing()
 
         self.assertEqual(tx.state, "cancel")
 
@@ -657,7 +652,6 @@ class RecurrenteApiControllerTest(RecurrenteApiCommon, PaymentHttpCommon):
 
     @mute_logger("odoo.addons.payment_recurrente_api.controllers.main")
     def test_refund_webhook_confirms_the_refund_transaction(self):
-        self._disable_process_patcher()
         source_tx = self._create_transaction("redirect")
         self._update_transaction(source_tx, provider_reference=self.checkout_id)
         source_tx._set_done()
@@ -674,7 +668,6 @@ class RecurrenteApiControllerTest(RecurrenteApiCommon, PaymentHttpCommon):
             response = self._post_webhook(
                 {"event_type": "refund.create", "refund": {"id": "re_3jfrywsf"}}
             )
-        self._run_processing()
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(request_mock.call_args.args[:2], ("GET", "/refunds/re_3jfrywsf"))
@@ -682,7 +675,6 @@ class RecurrenteApiControllerTest(RecurrenteApiCommon, PaymentHttpCommon):
 
     @mute_logger("odoo.addons.payment_recurrente_api.controllers.main")
     def test_webhook_confirms_a_saved_card_payment(self):
-        self._disable_process_patcher()
         token = self._create_token(provider_ref="pay_m_7v5ie3pw")
         tx = self._create_transaction("token", token_id=token.id)
         self._update_transaction(tx, provider_reference="in_z2zh85f7")
@@ -697,7 +689,6 @@ class RecurrenteApiControllerTest(RecurrenteApiCommon, PaymentHttpCommon):
 
         with patch(SEND_API_REQUEST, return_value=intent) as request_mock:
             response = self._post_webhook({"event_type": "intent.succeeded", "id": "in_z2zh85f7"})
-        self._run_processing()
 
         self.assertEqual(response.status_code, 200)
         self.assertEqual(request_mock.call_args.args[:2], ("GET", "/intents/in_z2zh85f7"))

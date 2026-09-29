@@ -4,10 +4,12 @@
     <record id="payment_provider_recurrente_api" model="payment.provider">
         <field name="name">Recurrente</field>
         <field name="code">recurrente_api</field>
-        <field name="image_128" type="bytes"
+        <field name="image_128" type="base64"
                file="payment_recurrente_api/static/description/icon.png"/>
         <field name="module_id" ref="base.module_payment_recurrente_api"/>
-        <field name="redirect_form_view_id" ref="payment.generic_redirect_form"/>
+        <field name="payment_method_ids"
+               eval="[Command.set([ref('payment_recurrente_api.payment_method_recurrente')])]"/>
+        <field name="redirect_form_view_id" ref="redirect_form"/>
     </record>
 
 </odoo>
